@@ -8,8 +8,7 @@ ENV PYTHONUNBUFFERED=1
 # 3) Dossier de travail dans le conteneur
 WORKDIR /app
 
-# 4) Copier les dépendances et les installer
-# ⚠️ Il faut que tu aies un requirements.txt à la racine du projet
+
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt

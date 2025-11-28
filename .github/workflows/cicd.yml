@@ -6,9 +6,7 @@ on:
       - "*"   # toutes les branches
 
 jobs:
-  # -----------------------
-  # 1) SAST : Bandit sur toutes les branches
-  # -----------------------
+  # 1) SAST Bandit sur toutes les branches
   bandit:
     runs-on: ubuntu-latest
 
@@ -26,3 +24,45 @@ jobs:
 
       - name: Run Bandit
         run: bandit -r .
+
+  # 2) Build & push de l'image Docker sur GHCR (seulement sur main)
+  build:
+    needs: bandit
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/tp3:latest
+
+  # 3) Déploiement sur Coolify via Webhook (seulement sur main, après build)
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Coolify Webhook
+        run: |
+          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}"
