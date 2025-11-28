@@ -63,6 +63,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Trigger Coolify Webhook
-        run: |
-          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}"
+    - name: Trigger Coolify Webhook
+      run: |
+        curl --location "${{ env.COOLIFY_WEBHOOK_URL }}" \
+          --header "Content-Type: text/plain" \
+          --header "Authorization: Bearer ${{ env.TOKEN_COOLIFY }}"
+
