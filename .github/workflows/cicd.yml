@@ -1,0 +1,28 @@
+name: CI/CD TP03
+
+on:
+  push:
+    branches:
+      - "*"   # toutes les branches
+
+jobs:
+  # -----------------------
+  # 1) SAST : Bandit sur toutes les branches
+  # -----------------------
+  bandit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit
+        run: bandit -r .
